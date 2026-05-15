@@ -17,7 +17,7 @@ MedAssist is an AI-powered medical information chatbot built using a Retrieval-A
 ---
 
 ## 🌐 Live Demo
-👉 MedAssist on HuggingFace Spaces: https://huggingface.co/spaces/YOUR_USERNAME/medassist-chatbot
+👉 https://huggingface.co/spaces/Wasim5647/MedAssist_Langchain
 
 ---
 
