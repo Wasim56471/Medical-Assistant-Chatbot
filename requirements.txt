@@ -1,0 +1,10 @@
+flask
+flask-cors
+langchain-core
+langchain-community
+langchain-huggingface
+faiss-cpu
+sentence-transformers
+datasets
+huggingface_hub
+numpy
