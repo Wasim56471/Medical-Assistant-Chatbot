@@ -8,110 +8,84 @@ app_port: 7860
 pinned: false
 ---
 
-# 🩺 MedAssist — AI Medical Information Assistant
+# 🩺 MedAssist — AI Medical Information Chatbot
 
-## Project Description
+MedAssist is an AI-powered medical information chatbot built using a Retrieval-Augmented Generation (RAG) architecture. It is trained on 20,000 real doctor-patient consultations and provides grounded, contextually relevant health information through a clean web interface.
 
-### Overview
+⚠️ Disclaimer: This chatbot is for general informational purposes only and does not constitute medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional.
 
-MedAssist is an AI-powered medical information assistant developed using a Retrieval-Augmented Generation (RAG) architecture. The system is designed to answer general health-related questions by retrieving relevant doctor-patient consultation examples from a medical knowledge base and then generating a clear, context-aware response using an instruction-tuned large language model.
+---
 
-### Knowledge Base
+## 🌐 Live Demo
+👉 MedAssist on HuggingFace Spaces: https://huggingface.co/spaces/YOUR_USERNAME/medassist-chatbot
 
-The project uses the `lavita/ChatDoctor-HealthCareMagic-100k` dataset, which contains real-world style patient questions and doctor responses. In this implementation, 20,000 consultation records are loaded from the dataset and converted into LangChain `Document` objects.
+---
 
-Each document combines the patient’s question and the doctor’s response, allowing the system to retrieve medically relevant examples when a user asks a new question.
+## 📌 Overview
 
-### Retrieval-Augmented Generation Pipeline
+MedAssist addresses the problem of hallucination in medical chatbots by grounding every response in real doctor-patient conversations retrieved at query time using semantic search. Instead of fine-tuning a model on medical data, MedAssist keeps a frozen general-purpose LLM and retrieves relevant medical context from a FAISS vector store built on the ChatDoctor-HealthCareMagic dataset.
 
-MedAssist uses a RAG pipeline to improve the quality and relevance of its answers. Instead of relying only on the language model’s general knowledge, the system first searches the medical consultation database for similar examples.
+---
 
-The retrieved examples are then passed to the language model as supporting context. This helps the chatbot produce more grounded and context-aware responses.
+## ⚙️ Tech Stack
 
-### Embeddings and Vector Search
+Component            | Technology
+---------------------|--------------------------------------------
+RAG Framework        | LangChain
+Vector Store         | FAISS
+Embeddings           | sentence-transformers/all-MiniLM-L6-v2
+LLM                  | Qwen2.5-7B-Instruct (HuggingFace Inference API)
+Dataset              | ChatDoctor-HealthCareMagic-100k
+Backend              | Flask
+Deployment           | HuggingFace Spaces (Docker)
+Development          | Google Colab
 
-To support semantic search, the project uses the `sentence-transformers/all-MiniLM-L6-v2` embedding model through LangChain’s Hugging Face integration.
+---
 
-The generated embeddings are stored in a FAISS vector database, which enables fast similarity search across the medical consultation corpus.
+## ✨ Features
 
-### Retrieval Strategy
+- RAG-based responses — every answer grounded in real doctor-patient consultations
+- Semantic search — FAISS with MMR retrieval finds the most relevant and diverse context
+- Multi-turn memory — remembers the last 4 conversation turns for follow-up questions
+- Off-topic filtering — redirects non-medical queries back to health topics
+- Emergency detection — identifies critical keywords and returns emergency service contacts
+- Prompt engineering — strict rules prevent hallucination and symptom assumption
+- Session reset — users can clear conversation history and start fresh
+- Medical disclaimer — automatically appended to every response
 
-The retriever uses Maximal Marginal Relevance (MMR), returning the top 5 relevant and diverse results from 20 candidate matches.
+---
 
-This helps reduce duplicate or overly similar retrieved examples and provides richer context to the language model before response generation.
+## 🗂️ Project Structure
 
-### Language Model
+medassist-chatbot/
+├── app.py              # Full self-contained Flask app with RAG pipeline
+├── requirements.txt    # Python dependencies
+├── Dockerfile          # Container configuration for HuggingFace Spaces
+└── README.md           # Project documentation
 
-For response generation, MedAssist uses `Qwen/Qwen2.5-7B-Instruct` through the Hugging Face Inference API.
+---
 
-The retrieved medical examples are inserted into a structured prompt template, which guides the model to generate helpful answers based on the retrieved context.
+## 🚀 How to Run Locally
 
-### Prompt Design and Safety
+git clone https://github.com/Wasim5647/medassist-chatbot.git
+cd medassist-chatbot
+pip install -r requirements.txt
+export HF_TOKEN="your_huggingface_token_here"
+python app.py
 
-The prompt is designed to make the chatbot treat retrieved examples as reference material only, not as the current user’s personal medical history.
+Open http://localhost:7860 in your browser.
 
-It also includes safety instructions to prevent the chatbot from assuming symptoms, inventing personal details, repeating disclaimers unnecessarily, or giving overly personalised medical advice.
+Note: First run takes around 10 minutes to download the dataset and build the FAISS index.
 
-### Conversation Memory
+---
 
-The chatbot maintains a short conversation history using the most recent turns. This allows the system to handle simple follow-up questions more naturally while keeping the interaction focused and lightweight.
+## 📊 Dataset
 
-### Web Application
+ChatDoctor-HealthCareMagic-100k — 100,000 real patient-doctor consultations sourced from HealthCareMagic. We use 20,000 samples for a balance between retrieval quality and startup speed.
 
-The application is implemented using Flask and includes a custom web interface for user interaction.
+Source: https://huggingface.co/datasets/lavita/ChatDoctor-HealthCareMagic-100k
 
-The interface provides a clean chatbot layout, suggested health-related question buttons, a reset option, query counter, and responsive styling.
+---
 
-### Deployment
-
-The project includes Docker support, making it suitable for deployment on Hugging Face Spaces using the Docker SDK.
-
-This allows the chatbot to run as a web-based application without requiring users to install the project locally.
-
-### Intended Use
-
-MedAssist is designed for educational and informational purposes only. It does not provide medical diagnosis, treatment decisions, prescriptions, or personalised medical advice.
-
-Users should always consult a qualified healthcare professional for personal medical concerns, urgent symptoms, or treatment decisions.
-
-## Key Features
-
-- Retrieval-Augmented Generation medical chatbot
-- LangChain-based document processing and prompt management
-- FAISS vector database for fast semantic search
-- MMR retrieval for relevant and diverse medical context
-- Hugging Face `all-MiniLM-L6-v2` sentence embeddings
-- Qwen2.5-7B-Instruct model for answer generation
-- Flask-based chatbot web interface
-- Docker-based deployment for Hugging Face Spaces
-- Short conversation memory for follow-up questions
-- Built-in medical disclaimer and safety-focused prompting
-
-## How the System Works
-
-1. The ChatDoctor-HealthCareMagic dataset is loaded from Hugging Face.
-2. Patient questions and doctor responses are converted into LangChain documents.
-3. The documents are embedded using a Hugging Face sentence-transformer model.
-4. The embeddings are stored in a FAISS vector database.
-5. When a user asks a question, the retriever finds the most relevant medical consultation examples.
-6. The retrieved examples are inserted into a structured prompt.
-7. Qwen2.5-7B-Instruct generates a response based on the retrieved context.
-8. The Flask web app displays the answer to the user with a medical disclaimer.
-
-## Technology Stack
-
-- Python
-- LangChain
-- FAISS
-- Hugging Face Datasets
-- Hugging Face Inference API
-- Sentence Transformers
-- Qwen2.5-7B-Instruct
-- Flask
-- Flask-CORS
-- Docker
-- Hugging Face Spaces
-
-## Medical Disclaimer
-
-MedAssist is designed for educational and informational purposes only. It does not provide medical diagnosis, treatment decisions, prescriptions, or personalised medical advice. Users should always consult a qualified healthcare professional for personal medical concerns, urgent symptoms, or treatment decisions.
+## 👤 Author
+Ahmad Wasim Wardak — MSc Applied AI, London South Bank University
